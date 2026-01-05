@@ -1,0 +1,19 @@
+{
+  "name": "Kordz - Music Reader",
+  "short_name": "Kordz",
+  "description": "Advanced Chord Player for Musicians",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/android/ic_launcher-web.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
+
