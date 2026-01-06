@@ -3,7 +3,7 @@ import withPWA from "@ducanh2912/next-pwa";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  turbopack: {},
+  // Removido turbopack: {} para forçar uso do Webpack (necessário para PWA)
 };
 
 const isDev = process.env.NODE_ENV === "development";
