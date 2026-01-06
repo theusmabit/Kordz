@@ -20,6 +20,15 @@ export interface ParsedLine {
 }
 
 /**
+ * Token visual para renderização com Flexbox
+ * Combina um acorde (opcional) com o texto que ele acompanha
+ */
+export interface VisualToken {
+  chord: string | null
+  text: string
+}
+
+/**
  * Parses a ChordPro formatted text line by line
  * Identifies chords between brackets (e.g., [Am], [G#m7])
  * Preserves whitespace for proper indentation
@@ -157,4 +166,50 @@ function parseSegments(line: string): LineSegment[] {
   }
 
   return segments
+}
+
+/**
+ * Converte segments em tokens visuais (chord + text)
+ * Cada token representa uma unidade visual: acorde acima do texto correspondente
+ * 
+ * Exemplo: "[G]Todos os dias quando [Bm]acordo"
+ * Tokens:
+ * - { chord: "G", text: "Todos os dias quando " }
+ * - { chord: "Bm", text: "acordo" }
+ */
+export function segmentsToTokens(segments: LineSegment[]): VisualToken[] {
+  const tokens: VisualToken[] = []
+  let currentText = ""
+  let currentChord: string | null = null
+
+  for (let i = 0; i < segments.length; i++) {
+    const segment = segments[i]
+
+    if (segment.type === "chord") {
+      // Se já temos texto acumulado sem acorde, adiciona como token sem acorde
+      if (currentText && currentChord === null) {
+        tokens.push({ chord: null, text: currentText })
+        currentText = ""
+      }
+      // Define o acorde atual
+      currentChord = segment.chord
+    } else if (segment.type === "text") {
+      // Adiciona o texto ao texto atual
+      currentText += segment.text
+
+      // Se temos um acorde definido, cria um token com acorde + texto
+      if (currentChord !== null) {
+        tokens.push({ chord: currentChord, text: currentText })
+        currentChord = null
+        currentText = ""
+      }
+    }
+  }
+
+  // Adiciona qualquer texto restante (pode ter acorde pendente ou não)
+  if (currentText || currentChord !== null) {
+    tokens.push({ chord: currentChord, text: currentText || "" })
+  }
+
+  return tokens
 }

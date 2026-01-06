@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { parseChordPro } from "@/lib/chord-parser";
+import { parseChordPro, segmentsToTokens } from "@/lib/chord-parser";
 import { usePlayerStore } from "@/stores/player-store";
 import { transposeChord, simplifyChord } from "@/lib/music-theory";
 import { cn } from "@/lib/utils";
@@ -51,44 +51,98 @@ export function ChordRenderer({ content, fontSize, showTabs = true }: ChordRende
         );
       }
 
-      // Se for bloco de letra + acorde (O mais comum)
+      // Se for bloco de letra + acorde (O mais comum) - usa tokenização visual
       if (line.type === "mixed") {
+        const tokens = segmentsToTokens(line.segments);
+        
         return (
-          <div key={lineIndex} className="relative mb-6 leading-[3rem] whitespace-pre-wrap">
-            {line.segments.map((seg, segIdx) => {
-              if (seg.type === "chord") {
-                // Processamento: 1. Transposição, 2. Simplificação (se ativada)
-                let processed = transposeChord(seg.chord, transposition);
+          <div 
+            key={lineIndex} 
+            className="flex flex-wrap mb-6"
+          >
+            {tokens.map((token, tokenIdx) => {
+              // Processa o acorde se existir
+              let processedChord: string | null = null;
+              if (token.chord) {
+                processedChord = transposeChord(token.chord, transposition);
                 if (isSimplified) {
-                  processed = simplifyChord(processed);
+                  processedChord = simplifyChord(processedChord);
                 }
-                
-                // Renderiza o acorde flutuando acima da letra
-                return (
-                  <span key={segIdx} className="relative inline-block">
-                    <span 
-                      className="absolute -top-6 left-0 font-bold text-primary select-none"
-                      aria-hidden="true"
-                    >
+              }
+
+              return (
+                <div 
+                  key={tokenIdx} 
+                  className="flex flex-col"
+                >
+                  {/* Acorde (altura fixa para manter alinhamento) */}
+                  <div className="h-6 flex items-start">
+                    {processedChord && (
+                      <span className="font-mono font-bold text-primary select-none">
+                        {processedChord}
+                      </span>
+                    )}
+                  </div>
+                  {/* Texto (preserva espaços) */}
+                  <span className="font-mono text-foreground whitespace-pre">
+                    {token.text}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        );
+      }
+
+      // Linha apenas com letra (sem acordes)
+      if (line.type === "lyrics-only") {
+        return (
+          <div 
+            key={lineIndex} 
+            className="mb-6"
+          >
+            <div className="flex flex-wrap">
+              <div className="flex flex-col">
+                <div className="h-6" />
+                <span className="font-mono text-foreground whitespace-pre">
+                  {line.originalLine}
+                </span>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // Linha apenas com acordes (sem letra)
+      if (line.type === "chord-only") {
+        return (
+          <div 
+            key={lineIndex} 
+            className="mb-6"
+          >
+            <div className="flex flex-wrap gap-2">
+              {line.segments.map((seg, segIdx) => {
+                if (seg.type === "chord") {
+                  let processed = transposeChord(seg.chord, transposition);
+                  if (isSimplified) {
+                    processed = simplifyChord(processed);
+                  }
+                  return (
+                    <span key={segIdx} className="font-mono font-bold text-primary">
                       {processed}
                     </span>
-                    <span className="text-foreground">{" "}</span>
-                  </span>
-                );
-              }
-              // Apenas letra
-              if (seg.type === "text") {
-                return <span key={segIdx} className="text-foreground">{seg.text}</span>;
-              }
-              return null;
-            })}
+                  );
+                }
+                return null;
+              })}
+            </div>
           </div>
         );
       }
 
       return null;
     });
-  }, [parsedLines, transposition, isSimplified]); // Dependências: texto, transposição e simplificação
+  }, [parsedLines, transposition, isSimplified, effectiveFontSize]); // Dependências: texto, transposição, simplificação e tamanho da fonte
 
   return (
     <div 
