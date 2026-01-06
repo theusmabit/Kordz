@@ -4,6 +4,8 @@ import withPWA from "@ducanh2912/next-pwa";
 const nextConfig: NextConfig = {
   /* config options here */
   // Removido turbopack: {} para forçar uso do Webpack (necessário para PWA)
+  reactStrictMode: false, // Evita conflitos com React Client Manifest
+  output: "standalone", // Ajuda com compatibilidade Webpack + PWA
 };
 
 const isDev = process.env.NODE_ENV === "development";
