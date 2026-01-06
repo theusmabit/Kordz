@@ -6,14 +6,18 @@ const nextConfig: NextConfig = {
   turbopack: {},
 };
 
+const isDev = process.env.NODE_ENV === "development";
 console.log("PWA Config Loaded - Environment:", process.env.NODE_ENV);
+console.log("PWA Disabled:", isDev);
+console.log("PWA will generate Service Worker:", !isDev);
 
 export default withPWA({
   dest: "public",
   register: true,
-  disable: process.env.NODE_ENV === "development",
+  disable: isDev, // Apenas desabilita em desenvolvimento local - SEMPRE ATIVO EM PRODUÇÃO
   workboxOptions: {
     disableDevLogs: true,
+    skipWaiting: true, // Move skipWaiting para dentro de workboxOptions
     runtimeCaching: [
       {
         urlPattern: /^https:\/\/fonts\.(?:gstatic|googleapis)\.com\/.*/i,
