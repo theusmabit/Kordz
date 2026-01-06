@@ -14,17 +14,17 @@
       "type": "image/png",
       "purpose": "any"
     }
-  ],
+  ], 
   "screenshots": [
     {
-      "src": "/screenshots/mobile.jpg",
+      "src": "/screenshots/mobile.png",
       "sizes": "750x1334",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Tela principal no celular"
     },
     {
-      "src": "/screenshots/desktop.jpg",
+      "src": "/screenshots/desktop.png",
       "sizes": "1920x1080",
       "type": "image/png",
       "form_factor": "wide",
